@@ -62,7 +62,7 @@ impl Shape for Sphere {
         let out_norm = ((p - self.center)/self.radius).norm();
         let h = true;
         let f = Hit::set_face(r, out_norm);
-        let n = Hit::set_norm(f, out_norm);
+        let n = Hit::set_norm(f, out_norm).norm();
         Hit{t, p, n, h, f}
     }
 }

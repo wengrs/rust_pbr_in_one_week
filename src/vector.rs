@@ -1,5 +1,7 @@
 use std::ops;
 use crate::color::RGB;
+extern crate rand;
+use rand::Rng;
 
 #[derive(Copy,Clone,Debug)]
 pub struct Vec3d
@@ -94,11 +96,31 @@ impl Vec3d
     {
         Vec3d::new(self[i0], self[i1], self[i2])
     }
+    pub fn sqrt(self) -> Vec3d {
+        let x = self.x.sqrt();
+        let y = self.y.sqrt();
+        let z = self.z.sqrt();
+        Vec3d{x, y, z}
+    }
     pub fn to_rgb(self) -> RGB {
         let r = clamp(self.x, 0., 1.);
         let g = clamp(self.y, 0., 1.);
         let b = clamp(self.z, 0., 1.);
         RGB{r, g, b}
+    }
+    pub fn rand_vec(min: f64, max: f64) -> Vec3d {
+        let x = rand::thread_rng().gen_range(min, max);
+        let y = rand::thread_rng().gen_range(min, max);
+        let z = rand::thread_rng().gen_range(min, max);
+        Vec3d{x, y, z}
+    }
+    pub fn rand_in_unit_sphere() -> Vec3d {
+        loop {
+            let p = Vec3d::rand_vec(-1., 1.);
+            if p.len() < 1. {
+                return p;
+            }
+        }
     }
 }
 
