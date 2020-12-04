@@ -2,8 +2,11 @@ pub mod vector;
 pub mod color;
 pub mod ray;
 pub mod shape;
+pub mod camera;
 extern crate bmp;
 use bmp::Image;
+extern crate rand;
+use rand::Rng;
 
 fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>) -> color::RGB {
     let hit = shape::hit_list(world, r, 0., f64::INFINITY);      
@@ -19,28 +22,26 @@ fn main() {
     let aspect_ratio = 16./9.;
     let img_width = 400 as u32;
     let img_height = (400./aspect_ratio) as u32;
+    let samples_per_pixel = 20;
 
     let world: Vec<Box<dyn shape::Shape>> = vec![
         Box::new(shape::Sphere{center: vector::Vec3d::new(0., 0., -1.), radius: 0.5}),
         Box::new(shape::Sphere{center: vector::Vec3d::new(0., -100.5, -1.), radius: 100.})];
 
-    let view_height = 2.;
-    let view_width = view_height*aspect_ratio;
-    let focal_length = 1.;
-
-    let origin = vector::Vec3d::zero();
-    let horizontal = vector::Vec3d::new(view_width, 0., 0.);
-    let vertical = vector::Vec3d::new(0., view_height, 0.);
-    let lower_left_corner = origin - horizontal/2. - vertical/2. - vector::Vec3d::new(0., 0., focal_length);
+    let cam = camera::Camera::new();
 
     let mut img = Image::new(img_width, img_height);
     for i in 0..img_width {
         for j in 0..img_height {
-            let u = i as f64 / (img_width - 1) as f64;
-            let v = j as f64 / (img_height - 1) as f64;
-            let r = ray::Ray::new(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            let pixel_color = ray_color(&r, &world);
-            img.set_pixel(i, j, pixel_color.pixel())
+            let mut pixel_color = vector::Vec3d::zero();
+            for _ in 0..samples_per_pixel {
+                let u = (i as f64 + rand::thread_rng().gen_range(0.0, 1.0))/(img_width as f64 - 1.);
+                let v = (j as f64 + rand::thread_rng().gen_range(0.0, 1.0))/(img_height as f64 - 1.);
+                let r = cam.get_ray(u, v);
+                pixel_color = pixel_color + ray_color(&r, &world).to_vec();
+            }
+            pixel_color = pixel_color / samples_per_pixel as f64;
+            img.set_pixel(i, img_height-j-1, color::RGB::from_vec(pixel_color).pixel());
         }
     }
     let _ = img.save("test.bmp");

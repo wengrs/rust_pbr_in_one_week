@@ -1,4 +1,4 @@
-use crate::vector;
+use crate::vector::Vec3d;
 extern crate bmp;
 
 #[derive(Clone, Copy, Debug)]
@@ -35,8 +35,11 @@ impl RGB
     {
         RGB::new(0., 0., 1.)
     }
-    pub fn from_vec(vec: vector::Vec3d) -> RGB {
+    pub fn from_vec(vec: Vec3d) -> RGB {
         RGB::new(vec.x, vec.y, vec.z)
+    }
+    pub fn to_vec(&self) -> Vec3d {
+        Vec3d::new(self.r, self.g, self.b)
     }
     pub fn pixel(self) ->   bmp::Pixel {
         let r = (self.r * 255.99) as u8;
