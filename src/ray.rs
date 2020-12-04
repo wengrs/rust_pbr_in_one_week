@@ -10,7 +10,7 @@ impl Ray {
     pub fn new(ori: Vec3d, dir: Vec3d) -> Ray {
         Ray {ori, dir}
     }
-    pub fn at(self, t: f64) -> Vec3d {
+    pub fn at(&self, t: f64) -> Vec3d {
         self.ori + t*self.dir
     }
 }

@@ -1,10 +1,30 @@
 pub mod vector;
 pub mod color;
 pub mod ray;
+pub mod shape;
 extern crate bmp;
 use bmp::Image;
 
+fn hit_sphere(cen: vector::Vec3d, radius: f64, r: &ray::Ray) -> f64 {
+    let oc = r.ori - cen;
+    let a = vector::Vec3d::dot(r.dir, r.dir);
+    let b = 2. * vector::Vec3d::dot(oc, r.dir);
+    let c = vector::Vec3d::dot(oc, oc) - radius * radius;
+    let dis = b*b - 4.*a*c;
+    if dis < 0. {
+        return -1.;
+    }
+    else {
+        return (-b-dis.sqrt()) / (2.*a)
+    }
+}
+
 fn ray_color(r: &ray::Ray) -> color::RGB {
+    let t = hit_sphere(vector::Vec3d::new(0., 0., -1.), 0.5, r);
+    if t > 0. {
+        let n = (r.at(t) - vector::Vec3d::new(0.,0.,-1.)).norm();
+        return color::RGB::from_vec(0.5*(n+vector::Vec3d::one()));
+    }
     let unit_dir = r.dir.norm();
     let t = 0.5*(unit_dir.y + 1.);
     color::RGB::from_vec((1.-t)*vector::Vec3d::new(1., 1., 1.)+t*vector::Vec3d::new(0.5, 0.7, 1.))
