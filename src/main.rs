@@ -3,10 +3,12 @@ pub mod color;
 pub mod ray;
 pub mod shape;
 pub mod camera;
+pub mod material;
 extern crate bmp;
 use bmp::Image;
 extern crate rand;
 use rand::Rng;
+use std::rc::Rc;
 
 fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>, depth: i32) -> color::RGB {
     if depth < 0 {
@@ -14,10 +16,14 @@ fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>, depth: i32) -> co
     }
     let hit = shape::hit_list(world, r, 0.0001, f64::INFINITY);      
     if hit.h == true {
-        let ori = hit.p;
-        let target = hit.p + hit.n + vector::Vec3d::rand_in_unit_sphere();
-        let rr = ray::Ray::new(ori, target-hit.p);
-        return (0.5*ray_color(&rr, &world, depth - 1).to_vec()).to_rgb();
+        let scatter = hit.mat.scatter(&r, &hit);
+        if scatter.s == true {
+            return (scatter.a.to_vec() * ray_color(&scatter.r, &world, depth - 1).to_vec()).to_rgb()
+        }
+        else
+        {
+            return color::RGB::black();
+        }
     }
     let unit_dir = r.dir.norm();
     let t = 0.5*(unit_dir.y + 1.);
@@ -29,11 +35,19 @@ fn main() {
     let img_width = 400 as u32;
     let img_height = (400./aspect_ratio) as u32;
     let samples_per_pixel = 100;
-    let max_depth = 50;
+    let max_depth = 20;
+    
+    let mat_ground = Rc::new(material::Lambertian{albedo: color::RGB::new(0.8, 0.8, 0.0)});
+    let mat_center = Rc::new(material::Lambertian{albedo: color::RGB::new(0.7, 0.3, 0.3)});
+    let mat_left = Rc::new(material::Metal{albedo: color::RGB::new(0.8, 0.8, 0.8)});
+    let mat_right = Rc::new(material::Metal{albedo: color::RGB::new(0.8, 0.6, 0.2)});
 
     let world: Vec<Box<dyn shape::Shape>> = vec![
-        Box::new(shape::Sphere{center: vector::Vec3d::new(0., 0., -1.), radius: 0.5}),
-        Box::new(shape::Sphere{center: vector::Vec3d::new(0., -100.5, -1.), radius: 100.})];
+        Box::new(shape::Sphere{center: vector::Vec3d::new(0., -100.5, -1.), radius: 100., mat: mat_ground.clone()}),
+        Box::new(shape::Sphere{center: vector::Vec3d::new(0., 0., -1.), radius: 0.5, mat: mat_center.clone()}),
+        Box::new(shape::Sphere{center: vector::Vec3d::new(-1., 0., -1.), radius: 0.5, mat: mat_left.clone()}),
+        Box::new(shape::Sphere{center: vector::Vec3d::new(1., 0., -1.), radius: 0.5, mat: mat_right.clone()}),
+        ];
 
     let cam = camera::Camera::new();
 

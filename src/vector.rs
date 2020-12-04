@@ -102,6 +102,13 @@ impl Vec3d
         let z = self.z.sqrt();
         Vec3d{x, y, z}
     }
+    pub fn near_zero(self) -> bool {
+        let s = 1e-8;
+        self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
+    }
+    pub fn reflect(v: Vec3d, n: Vec3d) -> Vec3d {
+        v - 2.*Vec3d::dot(v, n)*n
+    }
     pub fn to_rgb(self) -> RGB {
         let r = clamp(self.x, 0., 1.);
         let g = clamp(self.y, 0., 1.);
@@ -120,6 +127,15 @@ impl Vec3d
             if p.len() < 1. {
                 return p;
             }
+        }
+    }
+    pub fn rand_in_unit_hemisphere(n: Vec3d) -> Vec3d {
+        let v = Vec3d::rand_in_unit_sphere();
+        if Vec3d::dot(v, n) > 0. {
+            return v;
+        }
+        else {
+            return -v;
         }
     }
 }
@@ -157,6 +173,15 @@ impl ops::Mul<Vec3d> for f64
     fn mul(self, v: Vec3d) -> Vec3d
     {
         Vec3d{ x: v.x*self, y: v.y*self, z: v.z*self } 
+    }
+}
+
+impl ops::Mul<Vec3d> for Vec3d
+{
+    type Output = Vec3d;
+    fn mul(self, v: Vec3d) -> Vec3d
+    {
+        Vec3d{ x: v.x*self.x, y: v.y*self.y, z: v.z*self.z } 
     }
 }
 
