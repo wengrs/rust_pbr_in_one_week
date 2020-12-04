@@ -16,7 +16,7 @@ pub struct Hit {
 
 impl Hit {
     pub fn miss() -> Hit {
-        Hit{ p:Vec3d::zero(), n:Vec3d::zero(), t:0., h:false, f:false}
+        Hit{ p:Vec3d::zero(), n:Vec3d::zero(), t:f64::INFINITY, h:false, f:false}
     }
     pub fn set_face(r: &Ray, out_norm: Vec3d) -> bool {
         Vec3d::dot(r.dir, out_norm) < 0.
@@ -59,10 +59,21 @@ impl Shape for Sphere {
         }
         let t = root;
         let p = r.at(t);
-        let out_norm = (p - self.center)/self.radius;
+        let out_norm = ((p - self.center)/self.radius).norm();
         let h = true;
         let f = Hit::set_face(r, out_norm);
         let n = Hit::set_norm(f, out_norm);
         Hit{t, p, n, h, f}
     }
+}
+
+pub fn hit_list(list: &Vec<Box<dyn Shape>>, r: &Ray, tmin: f64, tmax: f64) -> Hit {
+    let mut curr_hit = Hit::miss();
+    for shape in list {
+        let hit = shape.hit(r, tmin, tmax);
+        if hit.h == true && hit.t < curr_hit.t {
+            curr_hit = hit;
+        }
+    }
+    curr_hit
 }

@@ -5,25 +5,10 @@ pub mod shape;
 extern crate bmp;
 use bmp::Image;
 
-fn hit_sphere(cen: vector::Vec3d, radius: f64, r: &ray::Ray) -> f64 {
-    let oc = r.ori - cen;
-    let a = vector::Vec3d::dot(r.dir, r.dir);
-    let b = 2. * vector::Vec3d::dot(oc, r.dir);
-    let c = vector::Vec3d::dot(oc, oc) - radius * radius;
-    let dis = b*b - 4.*a*c;
-    if dis < 0. {
-        return -1.;
-    }
-    else {
-        return (-b-dis.sqrt()) / (2.*a)
-    }
-}
-
-fn ray_color(r: &ray::Ray) -> color::RGB {
-    let t = hit_sphere(vector::Vec3d::new(0., 0., -1.), 0.5, r);
-    if t > 0. {
-        let n = (r.at(t) - vector::Vec3d::new(0.,0.,-1.)).norm();
-        return color::RGB::from_vec(0.5*(n+vector::Vec3d::one()));
+fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>) -> color::RGB {
+    let hit = shape::hit_list(world, r, 0., f64::INFINITY);      
+    if hit.h == true {
+        return color::RGB::from_vec(0.5 * (hit.n + vector::Vec3d::one()));
     }
     let unit_dir = r.dir.norm();
     let t = 0.5*(unit_dir.y + 1.);
@@ -34,6 +19,10 @@ fn main() {
     let aspect_ratio = 16./9.;
     let img_width = 400 as u32;
     let img_height = (400./aspect_ratio) as u32;
+
+    let world: Vec<Box<dyn shape::Shape>> = vec![
+        Box::new(shape::Sphere{center: vector::Vec3d::new(0., 0., -1.), radius: 0.5}),
+        Box::new(shape::Sphere{center: vector::Vec3d::new(0., -100.5, -1.), radius: 100.})];
 
     let view_height = 2.;
     let view_width = view_height*aspect_ratio;
@@ -50,7 +39,7 @@ fn main() {
             let u = i as f64 / (img_width - 1) as f64;
             let v = j as f64 / (img_height - 1) as f64;
             let r = ray::Ray::new(origin, lower_left_corner + u*horizontal + v*vertical - origin);
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             img.set_pixel(i, j, pixel_color.pixel())
         }
     }
