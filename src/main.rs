@@ -11,11 +11,11 @@ use rand::Rng;
 fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>) -> color::RGB {
     let hit = shape::hit_list(world, r, 0., f64::INFINITY);      
     if hit.h == true {
-        return color::RGB::from_vec(0.5 * (hit.n + vector::Vec3d::one()));
+        return (0.5 * (hit.n + vector::Vec3d::one())).to_rgb();
     }
     let unit_dir = r.dir.norm();
     let t = 0.5*(unit_dir.y + 1.);
-    color::RGB::from_vec((1.-t)*vector::Vec3d::new(1., 1., 1.)+t*vector::Vec3d::new(0.5, 0.7, 1.))
+    ((1.-t)*vector::Vec3d::new(1., 1., 1.)+t*vector::Vec3d::new(0.5, 0.7, 1.)).to_rgb()
 }
 
 fn main() {
@@ -41,7 +41,7 @@ fn main() {
                 pixel_color = pixel_color + ray_color(&r, &world).to_vec();
             }
             pixel_color = pixel_color / samples_per_pixel as f64;
-            img.set_pixel(i, img_height-j-1, color::RGB::from_vec(pixel_color).pixel());
+            img.set_pixel(i, img_height-j-1, pixel_color.to_rgb().pixel());
         }
     }
     let _ = img.save("test.bmp");

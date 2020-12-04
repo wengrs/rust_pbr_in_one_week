@@ -1,4 +1,5 @@
 use std::ops;
+use crate::color::RGB;
 
 #[derive(Copy,Clone,Debug)]
 pub struct Vec3d
@@ -89,9 +90,15 @@ impl Vec3d
         let z = f64::max(v1.z, v2.z);
         Vec3d{ x, y, z}
     }
-    pub fn permute(&self, i0: usize, i1: usize, i2: usize) -> Vec3d
+    pub fn permute(self, i0: usize, i1: usize, i2: usize) -> Vec3d
     {
         Vec3d::new(self[i0], self[i1], self[i2])
+    }
+    pub fn to_rgb(self) -> RGB {
+        let r = clamp(self.x, 0., 1.);
+        let g = clamp(self.y, 0., 1.);
+        let b = clamp(self.z, 0., 1.);
+        RGB{r, g, b}
     }
 }
 
@@ -160,5 +167,21 @@ impl ops::Index<usize> for Vec3d
             1 => &self.y,
             _ => &self.z,
         }
+    }
+}
+
+fn clamp(v: f64, down: f64, up: f64) -> f64
+{
+    if v > up
+    {
+        return up;
+    }
+    else if v < down
+    {
+        return down;
+    }
+    else
+    {
+        return v;
     }
 }

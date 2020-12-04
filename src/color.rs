@@ -35,9 +35,6 @@ impl RGB
     {
         RGB::new(0., 0., 1.)
     }
-    pub fn from_vec(vec: Vec3d) -> RGB {
-        RGB::new(vec.x, vec.y, vec.z)
-    }
     pub fn to_vec(&self) -> Vec3d {
         Vec3d::new(self.r, self.g, self.b)
     }
