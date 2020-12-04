@@ -1,3 +1,6 @@
+use crate::vector;
+extern crate bmp;
+
 #[derive(Clone, Copy, Debug)]
 pub struct RGB
 {
@@ -32,10 +35,18 @@ impl RGB
     {
         RGB::new(0., 0., 1.)
     }
-    
+    pub fn from_vec(vec: vector::Vec3d) -> RGB {
+        RGB::new(vec.x, vec.y, vec.z)
+    }
+    pub fn pixel(self) ->   bmp::Pixel {
+        let r = (self.r * 255.99) as u8;
+        let g = (self.g * 255.99) as u8;
+        let b = (self.b * 255.99) as u8;
+        bmp::Pixel::new(r, g, b)
+    }
 }
 
-fn clamp(v: f64, up: f64, down: f64) -> f64
+fn clamp(v: f64, down: f64, up: f64) -> f64
 {
     if v > up
     {
