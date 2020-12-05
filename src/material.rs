@@ -45,14 +45,29 @@ impl Material for Lambertian {
 
 pub struct Metal {
     pub albedo: RGB,
+    pub fuzz: f64,
 }
 
 impl Material for Metal {
     fn scatter(&self, r_in: &Ray, hit: &Hit) -> Scatter {
         let reflected = Vec3d::reflect(r_in.dir, hit.n);
         let s = Vec3d::dot(reflected, hit.n) > 0.;
-        let r = Ray::new(hit.p, reflected);
+        let r = Ray::new(hit.p, reflected + self.fuzz*Vec3d::rand_in_unit_sphere());
         let a = self.albedo;
         Scatter{s, r, a}
     }  
+}
+
+pub struct Dielectric {
+    pub ir: f64,
+}
+
+impl Material for Dielectric {
+    fn scatter(&self, r_in: &Ray, hit: &Hit) -> Scatter {
+        let a = Vec3d::one().to_rgb();
+        let rf_ratio = if hit.f {1./self.ir} else {self.ir};
+        let rf = Vec3d::refract(r_in.dir.norm(), hit.n, rf_ratio);
+        let r = Ray::new(hit.p, rf);
+        Scatter{s:true, r, a}
+    }
 }

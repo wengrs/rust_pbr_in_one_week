@@ -107,7 +107,17 @@ impl Vec3d
         self.x.abs() < s && self.y.abs() < s && self.z.abs() < s
     }
     pub fn reflect(v: Vec3d, n: Vec3d) -> Vec3d {
+        let v = v.norm();
+        let n = n.norm();
         v - 2.*Vec3d::dot(v, n)*n
+    }
+    pub fn refract(v: Vec3d, n: Vec3d, eta_ratio: f64) -> Vec3d {
+        let v = v.norm();
+        let n = n.norm();
+        let cos_theta = f64::min(Vec3d::dot(-v, n), 1.);
+        let r_perp = eta_ratio*(v + cos_theta*n);
+        let r_para = -(1.-r_perp.lensq()).abs().sqrt()*n;
+        r_perp + r_para
     }
     pub fn to_rgb(self) -> RGB {
         let r = clamp(self.x, 0., 1.);

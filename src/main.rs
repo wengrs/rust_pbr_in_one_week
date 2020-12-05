@@ -38,9 +38,9 @@ fn main() {
     let max_depth = 20;
     
     let mat_ground = Rc::new(material::Lambertian{albedo: color::RGB::new(0.8, 0.8, 0.0)});
-    let mat_center = Rc::new(material::Lambertian{albedo: color::RGB::new(0.7, 0.3, 0.3)});
-    let mat_left = Rc::new(material::Metal{albedo: color::RGB::new(0.8, 0.8, 0.8)});
-    let mat_right = Rc::new(material::Metal{albedo: color::RGB::new(0.8, 0.6, 0.2)});
+    let mat_center = Rc::new(material::Dielectric{ir: 1.5});
+    let mat_left = Rc::new(material::Dielectric{ir: 1.5});
+    let mat_right = Rc::new(material::Metal{albedo: color::RGB::new(0.8, 0.6, 0.2), fuzz:1.0});
 
     let world: Vec<Box<dyn shape::Shape>> = vec![
         Box::new(shape::Sphere{center: vector::Vec3d::new(0., -100.5, -1.), radius: 100., mat: mat_ground.clone()}),
