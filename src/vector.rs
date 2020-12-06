@@ -148,6 +148,14 @@ impl Vec3d
             return -v;
         }
     }
+    pub fn rand_in_unit_disk() -> Vec3d {
+        loop {
+            let p = Vec3d::new(rand::thread_rng().gen_range(-1., 1.), rand::thread_rng().gen_range(-1., 1.), 0.);
+            if p.len() < 1. {
+                return p;
+            }
+        }
+    }
 }
 
 impl ops::Add for Vec3d
