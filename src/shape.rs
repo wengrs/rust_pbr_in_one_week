@@ -2,7 +2,7 @@ use crate::vector::Vec3d;
 use crate::ray::Ray;
 use crate::material::Material;
 use crate::material;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub trait Shape {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit;
@@ -15,12 +15,12 @@ pub struct Hit {
     pub t: f64,
     pub h: bool,
     pub f: bool,
-    pub mat: Rc<dyn Material>,
+    pub mat: Arc<dyn Material>,
 }
 
 impl Hit {
     pub fn miss() -> Hit {
-        Hit{ p:Vec3d::zero(), n:Vec3d::zero(), t:f64::INFINITY, h:false, f:false, mat:Rc::new(material::Nothing{})}
+        Hit{ p:Vec3d::zero(), n:Vec3d::zero(), t:f64::INFINITY, h:false, f:false, mat:Arc::new(material::Nothing{})}
     }
     pub fn set_face(r: &Ray, out_norm: Vec3d) -> bool {
         Vec3d::dot(r.dir, out_norm) < 0.
@@ -39,7 +39,7 @@ impl Hit {
 pub struct Sphere {
     pub center: Vec3d,
     pub radius: f64,
-    pub mat: Rc<dyn Material>,
+    pub mat: Arc<dyn Material>,
 }
 
 impl Shape for Sphere {
@@ -68,7 +68,7 @@ impl Shape for Sphere {
         let h = true;
         let f = Hit::set_face(r, out_norm);
         let n = Hit::set_norm(f, out_norm).norm();
-        Hit{t, p, n, h, f, mat:Rc::clone(&self.mat)}
+        Hit{t, p, n, h, f, mat:Arc::clone(&self.mat)}
     }
 }
 

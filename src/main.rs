@@ -9,7 +9,7 @@ extern crate bmp;
 use bmp::Image;
 extern crate rand;
 use rand::Rng;
-use std::rc::Rc;
+use std::sync::Arc;
 
 fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>, depth: i32) -> color::RGB {
     if depth < 0 {
@@ -33,8 +33,8 @@ fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>, depth: i32) -> co
 
 fn main() {
     let aspect_ratio = 16./9.;
-    let img_width = 400 as u32;
-    let img_height = (400./aspect_ratio) as u32;
+    let img_width = 200 as u32;
+    let img_height = (img_width as f64/aspect_ratio) as u32;
     let samples_per_pixel = 100;
     let max_depth = 20;
     
@@ -66,10 +66,10 @@ fn main() {
 
 fn random_scene() -> Vec<Box<dyn shape::Shape>> {
     let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
-    let ground_mat = Rc::new(material::Lambertian{albedo: color::RGB::new(0.5, 0.5, 0.5)});
+    let ground_mat = Arc::new(material::Lambertian{albedo: color::RGB::new(0.5, 0.5, 0.5)});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,-1000.,0.), radius:1000., mat:ground_mat.clone()}));
-    for a in -10..11 {
-        for b in -10..11 {
+    for a in -6..7 {
+        for b in -6..7 {
             let radius = 0.2;
             let choose_mat = rand::thread_rng().gen_range(0.,1.);
             let center = Vec3d::new(a as f64 + 0.9*rand::thread_rng().gen_range(0.,1.),
@@ -77,27 +77,27 @@ fn random_scene() -> Vec<Box<dyn shape::Shape>> {
                                     b as f64 + 0.9*rand::thread_rng().gen_range(0.,1.));
             if choose_mat < 0.8 {
                 let albedo = Vec3d::rand_vec(0., 1.).to_rgb();
-                let mat = Rc::new(material::Lambertian{albedo});
+                let mat = Arc::new(material::Lambertian{albedo});
                 world.push(Box::new(shape::Sphere{center, radius, mat}));
             }
             else if choose_mat < 0.95 {
                 let albedo = Vec3d::rand_vec(0.5, 1.).to_rgb();
                 let fuzz = rand::thread_rng().gen_range(0.,0.5);
-                let mat = Rc::new(material::Metal{albedo, fuzz});
+                let mat = Arc::new(material::Metal{albedo, fuzz});
                 world.push(Box::new(shape::Sphere{center, radius, mat}));
             }
             else {
-                let mat = Rc::new(material::Dielectric{ir:1.5});
+                let mat = Arc::new(material::Dielectric{ir:1.5});
                 world.push(Box::new(shape::Sphere{center, radius, mat}));
             }
         }
     }
     let radius = 1.;
-    let mat = Rc::new(material::Dielectric{ir:1.5});
+    let mat = Arc::new(material::Dielectric{ir:1.5});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,1.,0.), radius, mat}));
-    let mat = Rc::new(material::Lambertian{albedo:color::RGB::new(0.4,0.2,0.1)});
+    let mat = Arc::new(material::Lambertian{albedo:color::RGB::new(0.4,0.2,0.1)});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(-4.,1.,0.), radius, mat}));
-    let mat = Rc::new(material::Metal{albedo:color::RGB::new(0.7,0.6,0.5),fuzz:0.});
+    let mat = Arc::new(material::Metal{albedo:color::RGB::new(0.7,0.6,0.5),fuzz:0.});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(4.,1.,0.), radius, mat}));
     world
 }
