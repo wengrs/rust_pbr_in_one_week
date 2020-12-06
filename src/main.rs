@@ -1,4 +1,5 @@
 pub mod vector;
+use vector::Vec3d;
 pub mod color;
 pub mod ray;
 pub mod shape;
@@ -37,24 +38,14 @@ fn main() {
     let samples_per_pixel = 100;
     let max_depth = 20;
     
-    let mat_ground = Rc::new(material::Lambertian{albedo: color::RGB::new(0.8, 0.8, 0.0)});
-    let mat_center = Rc::new(material::Lambertian{albedo: color::RGB::new(0.1, 0.2, 0.5)});
-    let mat_left = Rc::new(material::Dielectric{ir: 1.5});
-    let mat_right = Rc::new(material::Metal{albedo: color::RGB::new(0.8, 0.6, 0.2), fuzz:0.});
-
-    let world: Vec<Box<dyn shape::Shape>> = vec![
-        Box::new(shape::Sphere{center: vector::Vec3d::new(0., -100.5, -1.), radius: 100., mat: mat_ground.clone()}),
-        Box::new(shape::Sphere{center: vector::Vec3d::new(0., 0., -1.), radius: 0.5, mat: mat_center.clone()}),
-        Box::new(shape::Sphere{center: vector::Vec3d::new(-1., 0., -1.), radius: 0.5, mat: mat_left.clone()}),
-        Box::new(shape::Sphere{center: vector::Vec3d::new(-1., 0., -1.), radius: -0.4, mat: mat_left.clone()}),
-        Box::new(shape::Sphere{center: vector::Vec3d::new(1., 0., -1.), radius: 0.5, mat: mat_right.clone()}),
-        ];
-    let look_from = vector::Vec3d::new(3., 3., 2.);
-    let look_at = vector::Vec3d::new(0.,0.,-1.);
+    let look_from = vector::Vec3d::new(13., 2., 3.);
+    let look_at = vector::Vec3d::new(0.,0.,0.);
     let up = vector::Vec3d::new(0., 1., 0.);
-    let focus_length = (look_from-look_at).len();
-    let aperture = 2.;
+    let focus_length = 10.;
+    let aperture = 0.1;
     let cam = camera::Camera::new(look_from, look_at, up, 20., aspect_ratio, aperture, focus_length);
+
+    let world = random_scene();
 
     let mut img = Image::new(img_width, img_height);
     for i in 0..img_width {
@@ -68,8 +59,47 @@ fn main() {
             }
             img.set_pixel(i, img_height-j-1, pixel_color.to_rgb().pixel());
         }
+        println!("{0}", i);
     }
     let _ = img.save("test.bmp");
+}
+
+fn random_scene() -> Vec<Box<dyn shape::Shape>> {
+    let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
+    let ground_mat = Rc::new(material::Lambertian{albedo: color::RGB::new(0.5, 0.5, 0.5)});
+    world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,-1000.,0.), radius:1000., mat:ground_mat.clone()}));
+    for a in -10..11 {
+        for b in -10..11 {
+            let radius = 0.2;
+            let choose_mat = rand::thread_rng().gen_range(0.,1.);
+            let center = Vec3d::new(a as f64 + 0.9*rand::thread_rng().gen_range(0.,1.),
+                                    0.2,
+                                    b as f64 + 0.9*rand::thread_rng().gen_range(0.,1.));
+            if choose_mat < 0.8 {
+                let albedo = Vec3d::rand_vec(0., 1.).to_rgb();
+                let mat = Rc::new(material::Lambertian{albedo});
+                world.push(Box::new(shape::Sphere{center, radius, mat}));
+            }
+            else if choose_mat < 0.95 {
+                let albedo = Vec3d::rand_vec(0.5, 1.).to_rgb();
+                let fuzz = rand::thread_rng().gen_range(0.,0.5);
+                let mat = Rc::new(material::Metal{albedo, fuzz});
+                world.push(Box::new(shape::Sphere{center, radius, mat}));
+            }
+            else {
+                let mat = Rc::new(material::Dielectric{ir:1.5});
+                world.push(Box::new(shape::Sphere{center, radius, mat}));
+            }
+        }
+    }
+    let radius = 1.;
+    let mat = Rc::new(material::Dielectric{ir:1.5});
+    world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,1.,0.), radius, mat}));
+    let mat = Rc::new(material::Lambertian{albedo:color::RGB::new(0.4,0.2,0.1)});
+    world.push(Box::new(shape::Sphere{center:Vec3d::new(-4.,1.,0.), radius, mat}));
+    let mat = Rc::new(material::Metal{albedo:color::RGB::new(0.7,0.6,0.5),fuzz:0.});
+    world.push(Box::new(shape::Sphere{center:Vec3d::new(4.,1.,0.), radius, mat}));
+    world
 }
 
 /*
