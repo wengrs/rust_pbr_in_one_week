@@ -33,7 +33,7 @@ fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>, depth: i32) -> co
 
 fn main() {
     let aspect_ratio = 16./9.;
-    let img_width = 200 as u32;
+    let img_width = 400 as u32;
     let img_height = (img_width as f64/aspect_ratio) as u32;
     let samples_per_pixel = 100;
     let max_depth = 20;
@@ -59,7 +59,7 @@ fn main() {
             }
             img.set_pixel(i, img_height-j-1, pixel_color.to_rgb().pixel());
         }
-        println!("{0}", i);
+        println!("{0}/{1}", i+1, img_width);
     }
     let _ = img.save("test.bmp");
 }
@@ -68,8 +68,8 @@ fn random_scene() -> Vec<Box<dyn shape::Shape>> {
     let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
     let ground_mat = Arc::new(material::Lambertian{albedo: color::RGB::new(0.5, 0.5, 0.5)});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,-1000.,0.), radius:1000., mat:ground_mat.clone()}));
-    for a in -6..7 {
-        for b in -6..7 {
+    for a in -5..6 {
+        for b in -5..6 {
             let radius = 0.2;
             let choose_mat = rand::thread_rng().gen_range(0.,1.);
             let center = Vec3d::new(a as f64 + 0.9*rand::thread_rng().gen_range(0.,1.),
