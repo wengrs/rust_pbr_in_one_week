@@ -43,7 +43,7 @@ fn main() {
     let up = vector::Vec3d::new(0., 1., 0.);
     let focus_length = 10.;
     let aperture = 0.1;
-    let cam = camera::Camera::new(look_from, look_at, up, 20., aspect_ratio, aperture, focus_length);
+    let cam = camera::Camera::new(look_from, look_at, up, 20., aspect_ratio, aperture, focus_length, 0., 1.);
 
     let world = random_scene();
 
@@ -78,7 +78,8 @@ fn random_scene() -> Vec<Box<dyn shape::Shape>> {
             if choose_mat < 0.8 {
                 let albedo = Vec3d::rand_vec(0., 1.).to_rgb();
                 let mat = Arc::new(material::Lambertian{albedo});
-                world.push(Box::new(shape::Sphere{center, radius, mat}));
+                let center2 = center + Vec3d::new(0., rand::thread_rng().gen_range(0., 0.5), 0.);
+                world.push(Box::new(shape::MovingSphere{c0:center, c1:center2, t0:0., t1:1., radius, mat}));
             }
             else if choose_mat < 0.95 {
                 let albedo = Vec3d::rand_vec(0.5, 1.).to_rgb();
