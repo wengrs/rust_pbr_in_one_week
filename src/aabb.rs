@@ -1,4 +1,5 @@
 use crate::vector::Vec3d;
+use crate::ray::Ray;
 
 #[derive(Clone, Debug)]
 pub struct AABB {
@@ -14,13 +15,20 @@ impl AABB {
         AABB{ min, max }
     }
 
+    pub fn union_box(b1: &AABB, b2: &AABB) -> AABB
+    {
+        let p_min = Vec3d::comp_min(b1.min, b2.min);
+        let p_max = Vec3d::comp_max(b1.max, b2.max);
+        AABB::new(p_min, p_max)
+    }
+    
     pub fn hit(&self, r: &Ray) -> bool {
-        let t1 = (self.p_min.x - r.o.x)/r.d.x;
-        let t2 = (self.p_max.x - r.o.x)/r.d.x;
-        let t3 = (self.p_min.y - r.o.y)/r.d.y;
-        let t4 = (self.p_max.y - r.o.y)/r.d.y;
-        let t5 = (self.p_min.z - r.o.z)/r.d.z;
-        let t6 = (self.p_max.z - r.o.z)/r.d.z;
+        let t1 = (self.min.x - r.ori.x)/r.dir.x;
+        let t2 = (self.max.x - r.ori.x)/r.dir.x;
+        let t3 = (self.min.y - r.ori.y)/r.dir.y;
+        let t4 = (self.max.y - r.ori.y)/r.dir.y;
+        let t5 = (self.min.z - r.ori.z)/r.dir.z;
+        let t6 = (self.max.z - r.ori.z)/r.dir.z;
 
         let tmin = f64::max(f64::max(f64::min(t1, t2), f64::min(t3, t4)), f64::min(t5, t6));
         let tmax = f64::min(f64::min(f64::max(t1, t2), f64::max(t3, t4)), f64::max(t5, t6));

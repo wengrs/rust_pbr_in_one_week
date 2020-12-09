@@ -5,6 +5,7 @@ pub mod ray;
 pub mod shape;
 pub mod camera;
 pub mod material;
+pub mod aabb;
 extern crate bmp;
 use bmp::Image;
 extern crate rand;

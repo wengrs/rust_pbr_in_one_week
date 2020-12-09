@@ -2,10 +2,12 @@ use crate::vector::Vec3d;
 use crate::ray::Ray;
 use crate::material::Material;
 use crate::material;
+use crate::aabb::AABB;
 use std::sync::Arc;
 
 pub trait Shape {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit;
+    fn bound(&self, t0: f64, t1: f64) -> AABB;
 }
 
 #[derive(Clone)]
@@ -81,6 +83,11 @@ impl Shape for Sphere {
         let n = Hit::set_norm(f, out_norm).norm();
         Hit{t, p, n, h, f, mat:Arc::clone(&self.mat)}
     }
+    fn bound(&self, _: f64, _: f64) -> AABB {
+        let p1 = self.center - self.radius*Vec3d::one();
+        let p2 = self.center + self.radius*Vec3d::one();
+        AABB::new(p1, p2)
+    }
 }
 #[derive(Clone)]
 pub struct MovingSphere {
@@ -125,5 +132,12 @@ impl Shape for MovingSphere {
         let f = Hit::set_face(r, out_norm);
         let n = Hit::set_norm(f, out_norm).norm();
         Hit{t, p, n, h, f, mat:Arc::clone(&self.mat)}
+    }
+    fn bound(&self, t0: f64, t1: f64) -> AABB {
+        let p00 = self.center(t0) - self.radius*Vec3d::one();
+        let p01 = self.center(t0) + self.radius*Vec3d::one();
+        let p10 = self.center(t1) - self.radius*Vec3d::one();
+        let p11 = self.center(t1) + self.radius*Vec3d::one();
+        AABB::union_box(&AABB::new(p00, p01), &AABB::new(p10, p11))
     }
 }
