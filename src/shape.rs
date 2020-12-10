@@ -49,6 +49,9 @@ impl Objects {
 
 impl Shape for Objects {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit {
+        if self.bound(tmin, tmax).hit(r, tmin, tmax) == false {
+            return Hit::miss();
+        }
         let mut curr_hit = Hit::miss();
         for shape in &self.object {
             let hit = shape.hit(r, tmin, tmax);
@@ -81,6 +84,9 @@ pub struct Sphere {
 
 impl Shape for Sphere {
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit {
+        if self.bound(tmin, tmax).hit(r, tmin, tmax) == false {
+            return Hit::miss();
+        }        
         let oc = r.ori - self.center;
         let a = r.dir.lensq();
         let hb = Vec3d::dot(oc, r.dir);
