@@ -37,15 +37,46 @@ impl Hit {
     }
 }
 
-pub fn hit_list(list: &Vec<Box<dyn Shape>>, r: &Ray, tmin: f64, tmax: f64) -> Hit {
-    let mut curr_hit = Hit::miss();
-    for shape in list {
-        let hit = shape.hit(r, tmin, tmax);
-        if hit.h == true && hit.t < curr_hit.t {
-            curr_hit = hit;
+impl Shape for Vec<Box<dyn Shape>> {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit {
+        let mut curr_hit = Hit::miss();
+        for shape in self {
+            let hit = shape.hit(r, tmin, tmax);
+            if hit.h == true && hit.t < curr_hit.t {
+                curr_hit = hit;
+            }
         }
+        curr_hit        
     }
-    curr_hit
+    fn bound(&self, _: f64, _: f64) -> AABB {
+        AABB::zero()
+    }
+}
+
+pub struct Objects {
+    pub object: Vec<Box<dyn Shape>>,
+}
+
+impl Objects {
+    pub fn new(object: Vec<Box<dyn Shape>>) -> Objects {
+        Objects{object}
+    }
+}
+
+impl Shape for Objects {
+    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit {
+        let mut curr_hit = Hit::miss();
+        for shape in &self.object {
+            let hit = shape.hit(r, tmin, tmax);
+            if hit.h == true && hit.t < curr_hit.t {
+                curr_hit = hit;
+            }
+        }
+        curr_hit           
+    }
+    fn bound(&self, _: f64, _: f64) -> AABB {
+        AABB::zero()
+    }
 }
 
 #[derive(Clone)]

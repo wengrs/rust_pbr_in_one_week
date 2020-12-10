@@ -3,6 +3,7 @@ use vector::Vec3d;
 pub mod color;
 pub mod ray;
 pub mod shape;
+use crate::shape::Shape;
 pub mod camera;
 pub mod material;
 pub mod aabb;
@@ -12,11 +13,11 @@ extern crate rand;
 use rand::Rng;
 use std::sync::Arc;
 
-fn ray_color(r: &ray::Ray, world: &Vec<Box<dyn shape::Shape>>, depth: i32) -> color::RGB {
+fn ray_color(r: &ray::Ray, world: &shape::Objects, depth: i32) -> color::RGB {
     if depth < 0 {
         return color::RGB::black();
     }
-    let hit = shape::hit_list(world, r, 0.0001, f64::INFINITY);      
+    let hit = world.hit(r, 0.0001, f64::INFINITY);      
     if hit.h == true {
         let scatter = hit.mat.scatter(&r, &hit);
         if scatter.s == true {
@@ -46,7 +47,7 @@ fn main() {
     let aperture = 0.1;
     let cam = camera::Camera::new(look_from, look_at, up, 20., aspect_ratio, aperture, focus_length, 0., 1.);
 
-    let world = random_scene();
+    let world = shape::Objects::new(random_scene());
 
     let mut img = Image::new(img_width, img_height);
     for i in 0..img_width {
