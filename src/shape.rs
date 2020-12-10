@@ -37,22 +37,6 @@ impl Hit {
     }
 }
 
-impl Shape for Vec<Box<dyn Shape>> {
-    fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit {
-        let mut curr_hit = Hit::miss();
-        for shape in self {
-            let hit = shape.hit(r, tmin, tmax);
-            if hit.h == true && hit.t < curr_hit.t {
-                curr_hit = hit;
-            }
-        }
-        curr_hit        
-    }
-    fn bound(&self, _: f64, _: f64) -> AABB {
-        AABB::zero()
-    }
-}
-
 pub struct Objects {
     pub object: Vec<Box<dyn Shape>>,
 }
@@ -74,8 +58,17 @@ impl Shape for Objects {
         }
         curr_hit           
     }
-    fn bound(&self, _: f64, _: f64) -> AABB {
-        AABB::zero()
+    fn bound(&self, t0: f64, t1: f64) -> AABB {
+        if self.object.len() == 0 {
+            return AABB::zero();
+        }
+        let mut first_box = true;
+        let mut temp_box = AABB::zero();
+        for o in &self.object {
+            temp_box = if first_box == true{o.bound(t0, t1)} else {AABB::union_box(&o.bound(t0, t1), &temp_box)};
+            first_box = false;
+        }
+        temp_box
     }
 }
 
