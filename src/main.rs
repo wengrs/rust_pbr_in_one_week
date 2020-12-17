@@ -7,6 +7,8 @@ use crate::shape::Shape;
 pub mod camera;
 pub mod material;
 pub mod aabb;
+pub mod texture;
+
 extern crate bmp;
 use bmp::Image;
 extern crate rand;

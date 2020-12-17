@@ -16,13 +16,15 @@ pub struct Hit {
     pub n: Vec3d,
     pub t: f64,
     pub h: bool,
+    pub u: f64,
+    pub v: f64,
     pub f: bool,
     pub mat: Arc<dyn Material>,
 }
 
 impl Hit {
     pub fn miss() -> Hit {
-        Hit{ p:Vec3d::zero(), n:Vec3d::zero(), t:f64::INFINITY, h:false, f:false, mat:Arc::new(material::Nothing{})}
+        Hit{ p:Vec3d::zero(), n:Vec3d::zero(), t:f64::INFINITY, h:false, u:0., v:0., f:false, mat:Arc::new(material::Nothing{})}
     }
     pub fn set_face(r: &Ray, out_norm: Vec3d) -> bool {
         Vec3d::dot(r.dir, out_norm) < 0.
@@ -111,7 +113,8 @@ impl Shape for Sphere {
         let h = true;
         let f = Hit::set_face(r, out_norm);
         let n = Hit::set_norm(f, out_norm).norm();
-        Hit{t, p, n, h, f, mat:Arc::clone(&self.mat)}
+        let (u, v) = self.get_sphere_uv(out_norm);
+        Hit{t, p, n, h, u, v, f, mat:Arc::clone(&self.mat)}
     }
     fn bound(&self, _: f64, _: f64) -> AABB {
         let p1 = self.center - self.radius*Vec3d::one();
@@ -119,6 +122,17 @@ impl Shape for Sphere {
         AABB::new(p1, p2)
     }
 }
+
+impl Sphere {
+    pub fn get_sphere_uv(&self, p: Vec3d) -> (f64, f64) {
+        let theta = -p.y.acos();
+        let phi = -p.z.atan2(p.x) + std::f64::consts::PI;
+        let u = phi/(2.*std::f64::consts::PI);
+        let v = theta/std::f64::consts::PI;
+        (u, v)
+    }
+}
+
 #[derive(Clone)]
 pub struct MovingSphere {
     pub c0: Vec3d,
@@ -161,7 +175,8 @@ impl Shape for MovingSphere {
         let h = true;
         let f = Hit::set_face(r, out_norm);
         let n = Hit::set_norm(f, out_norm).norm();
-        Hit{t, p, n, h, f, mat:Arc::clone(&self.mat)}
+        let (u, v) = self.get_sphere_uv(out_norm);
+        Hit{t, p, n, h, u, v, f, mat:Arc::clone(&self.mat)}
     }
     fn bound(&self, t0: f64, t1: f64) -> AABB {
         let p00 = self.center(t0) - self.radius*Vec3d::one();
@@ -169,5 +184,15 @@ impl Shape for MovingSphere {
         let p10 = self.center(t1) - self.radius*Vec3d::one();
         let p11 = self.center(t1) + self.radius*Vec3d::one();
         AABB::union_box(&AABB::new(p00, p01), &AABB::new(p10, p11))
+    }
+}
+
+impl MovingSphere {
+    pub fn get_sphere_uv(&self, p: Vec3d) -> (f64, f64) {
+        let theta = -p.y.acos();
+        let phi = -p.z.atan2(p.x) + std::f64::consts::PI;
+        let u = phi/(2.*std::f64::consts::PI);
+        let v = theta/std::f64::consts::PI;
+        (u, v)
     }
 }
