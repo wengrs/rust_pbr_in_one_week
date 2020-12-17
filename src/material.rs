@@ -3,7 +3,7 @@ use crate::ray::Ray;
 use crate::color::RGB;
 use crate::shape::Hit;
 use crate::texture::Texture;
-use crate::texture::SolidColor;
+use crate::texture::SolidTexture;
 extern crate rand;
 use rand::Rng;
 
@@ -49,7 +49,7 @@ impl Material for Lambertian {
 
 impl Lambertian {
     pub fn new(color:RGB) -> Lambertian {
-        let albedo = SolidColor{color};
+        let albedo = SolidTexture{color};
         Lambertian{albedo:Box::new(albedo)}
     }
 }
