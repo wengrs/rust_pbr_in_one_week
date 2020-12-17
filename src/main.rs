@@ -70,7 +70,7 @@ fn main() {
 
 fn random_scene() -> Vec<Box<dyn shape::Shape>> {
     let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
-    let ground_mat = Arc::new(material::Lambertian{albedo: color::RGB::new(0.5, 0.5, 0.5)});
+    let ground_mat = Arc::new(material::Lambertian::new(color::RGB::new(0.5, 0.5, 0.5)));
     world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,-1000.,0.), radius:1000., mat:ground_mat.clone()}));
     for a in -5..6 {
         for b in -5..6 {
@@ -81,7 +81,7 @@ fn random_scene() -> Vec<Box<dyn shape::Shape>> {
                                     b as f64 + 0.9*rand::thread_rng().gen_range(0.,1.));
             if choose_mat < 0.8 {
                 let albedo = Vec3d::rand_vec(0., 1.).to_rgb();
-                let mat = Arc::new(material::Lambertian{albedo});
+                let mat = Arc::new(material::Lambertian::new(albedo));
                 let center2 = center + Vec3d::new(0., rand::thread_rng().gen_range(0., 0.5), 0.);
                 world.push(Box::new(shape::MovingSphere{c0:center, c1:center2, t0:0., t1:1., radius, mat}));
             }
@@ -100,7 +100,7 @@ fn random_scene() -> Vec<Box<dyn shape::Shape>> {
     let radius = 1.;
     let mat = Arc::new(material::Dielectric{ir:1.5});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,1.,0.), radius, mat}));
-    let mat = Arc::new(material::Lambertian{albedo:color::RGB::new(0.4,0.2,0.1)});
+    let mat = Arc::new(material::Lambertian::new(color::RGB::new(0.4,0.2,0.1)));
     world.push(Box::new(shape::Sphere{center:Vec3d::new(-4.,1.,0.), radius, mat}));
     let mat = Arc::new(material::Metal{albedo:color::RGB::new(0.7,0.6,0.5),fuzz:0.});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(4.,1.,0.), radius, mat}));

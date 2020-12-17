@@ -2,6 +2,8 @@ use crate::vector::Vec3d;
 use crate::ray::Ray;
 use crate::color::RGB;
 use crate::shape::Hit;
+use crate::texture::Texture;
+use crate::texture::SolidColor;
 extern crate rand;
 use rand::Rng;
 
@@ -29,7 +31,7 @@ impl Material for Nothing {
 }
 
 pub struct Lambertian {
-    pub albedo: RGB,
+    pub albedo: Box<dyn Texture>,
 }
 
 impl Material for Lambertian {
@@ -40,9 +42,16 @@ impl Material for Lambertian {
             dir = hit.n;
         }
         let r = Ray::new(hit.p, dir, r_in.t);
-        let a = self.albedo;
+        let a = self.albedo.value(hit.u, hit.v, hit.p);
         Scatter{s, r, a}
     }    
+}
+
+impl Lambertian {
+    pub fn new(color:RGB) -> Lambertian {
+        let albedo = SolidColor{color};
+        Lambertian{albedo:Box::new(albedo)}
+    }
 }
 
 pub struct Metal {
