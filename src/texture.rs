@@ -39,3 +39,52 @@ impl CheckerTexture {
         CheckerTexture{odd, even}
     }
 }
+
+pub struct ImageTexture {
+    pub data: bmp::Image,
+    pub width: u32,
+    pub height: u32,
+}
+
+impl ImageTexture {
+    pub fn new(filename: &str) -> ImageTexture {
+        let path = std::path::Path::new(&filename);
+        let data = bmp::open(path).unwrap_or_else(|e| {
+            panic!("Failed to open: {}", e);
+        });
+        let width = data.get_width();
+        let height = data.get_height();
+
+        ImageTexture{data, width, height}
+    }
+}
+
+impl Texture for ImageTexture {
+    fn value(&self, u: f64, v: f64, _p: Vec3d) -> RGB {
+        let u = clamp(u, 0., 1.);
+        let v = 1. - clamp(v, 0., 1.);
+        let mut i = (u*self.width as f64) as u32;
+        let mut j = (v*self.height as f64) as u32;
+        if i >= self.width {i = self.width - 1}
+        if j >= self.height{j = self.height - 1}
+        let pixel = self.data.get_pixel(i, j);
+
+        RGB::from_pixel(pixel)
+    }
+}
+
+fn clamp(v: f64, down: f64, up: f64) -> f64
+{
+    if v > up
+    {
+        return up;
+    }
+    else if v < down
+    {
+        return down;
+    }
+    else
+    {
+        return v;
+    }
+}

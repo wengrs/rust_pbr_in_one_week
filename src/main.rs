@@ -49,8 +49,8 @@ fn main() {
     let aperture = 0.1;
     let cam = camera::Camera::new(look_from, look_at, up, 20., aspect_ratio, aperture, focus_length, 0., 1.);
     random_scene();
-    let world = two_spheres();
-
+    two_spheres();
+    let world = earth();
     let mut img = Image::new(img_width, img_height);
     for i in 0..img_width {
         for j in 0..img_height {
@@ -63,7 +63,9 @@ fn main() {
             }
             img.set_pixel(i, img_height-j-1, pixel_color.to_rgb().pixel());
         }
-        println!("{0}/{1}", i+1, img_width);
+        if (i+1) % 10 == 0 {
+            println!("{0}/{1}", i+1, img_width);
+        }
     }
     let _ = img.save("test.bmp");
 }
@@ -114,6 +116,14 @@ fn two_spheres() -> shape::Objects {
     let mat = Arc::new(material::Lambertian{albedo:Box::new(texture::CheckerTexture::new(color::RGB::new(0.2,0.3,0.1),color::RGB::white()))});
     world.push(Box::new(shape::Sphere{center:vector::Vec3d::new(0.,-10.,0.), radius:10., mat:mat.clone()}));
     world.push(Box::new(shape::Sphere{center:vector::Vec3d::new(0.,10.,0.), radius:10., mat:mat.clone()}));
+    shape::Objects::new(world)
+}
+
+fn earth() -> shape::Objects {
+    let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
+    let earth_texture = texture::ImageTexture::new("earthmap.bmp");
+    let mat = Arc::new(material::Lambertian{albedo:Box::new(earth_texture)});
+    world.push(Box::new(shape::Sphere{center:vector::Vec3d::zero(), radius:2., mat:mat.clone()}));
     shape::Objects::new(world)
 }
 

@@ -44,6 +44,13 @@ impl RGB
         let b = (self.b * 255.99) as u8;
         bmp::Pixel::new(r, g, b)
     }
+    pub fn from_pixel(pixel: bmp::Pixel) -> RGB {
+        let r = pixel.r as f64 / 255.;
+        let g = pixel.g as f64 / 255.;
+        let b = pixel.b as f64 / 255.;
+        RGB::new(r, g, b)
+    }
+
 }
 
 fn clamp(v: f64, down: f64, up: f64) -> f64

@@ -125,8 +125,8 @@ impl Shape for Sphere {
 
 impl Sphere {
     pub fn get_sphere_uv(&self, p: Vec3d) -> (f64, f64) {
-        let theta = -p.y.acos();
-        let phi = -p.z.atan2(p.x) + std::f64::consts::PI;
+        let theta = (-p.y).acos();
+        let phi = (-p.z).atan2(p.x) + std::f64::consts::PI;
         let u = phi/(2.*std::f64::consts::PI);
         let v = theta/std::f64::consts::PI;
         (u, v)
