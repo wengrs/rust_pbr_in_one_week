@@ -31,3 +31,11 @@ impl Texture for CheckerTexture {
         }
     }
 }
+
+impl CheckerTexture {
+    pub fn new(odd: RGB, even: RGB) -> CheckerTexture {
+        let odd = Box::new(SolidTexture{color: odd});
+        let even = Box::new(SolidTexture{color: even});
+        CheckerTexture{odd, even}
+    }
+}

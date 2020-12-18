@@ -48,8 +48,8 @@ fn main() {
     let focus_length = 10.;
     let aperture = 0.1;
     let cam = camera::Camera::new(look_from, look_at, up, 20., aspect_ratio, aperture, focus_length, 0., 1.);
-
-    let world = shape::Objects::new(random_scene());
+    random_scene();
+    let world = two_spheres();
 
     let mut img = Image::new(img_width, img_height);
     for i in 0..img_width {
@@ -68,7 +68,7 @@ fn main() {
     let _ = img.save("test.bmp");
 }
 
-fn random_scene() -> Vec<Box<dyn shape::Shape>> {
+fn random_scene() -> shape::Objects {
     let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
     let odd = Box::new(texture::SolidTexture{color:color::RGB::new(0.2, 0.3, 0.1)});
     let even = Box::new(texture::SolidTexture{color:color::RGB::new(0.9, 0.9, 0.9)});
@@ -106,7 +106,15 @@ fn random_scene() -> Vec<Box<dyn shape::Shape>> {
     world.push(Box::new(shape::Sphere{center:Vec3d::new(-4.,1.,0.), radius, mat}));
     let mat = Arc::new(material::Metal{albedo:color::RGB::new(0.7,0.6,0.5),fuzz:0.});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(4.,1.,0.), radius, mat}));
-    world
+    shape::Objects::new(world)
+}
+
+fn two_spheres() -> shape::Objects {
+    let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
+    let mat = Arc::new(material::Lambertian{albedo:Box::new(texture::CheckerTexture::new(color::RGB::new(0.2,0.3,0.1),color::RGB::white()))});
+    world.push(Box::new(shape::Sphere{center:vector::Vec3d::new(0.,-10.,0.), radius:10., mat:mat.clone()}));
+    world.push(Box::new(shape::Sphere{center:vector::Vec3d::new(0.,10.,0.), radius:10., mat:mat.clone()}));
+    shape::Objects::new(world)
 }
 
 /*
