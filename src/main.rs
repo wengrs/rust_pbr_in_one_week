@@ -70,7 +70,9 @@ fn main() {
 
 fn random_scene() -> Vec<Box<dyn shape::Shape>> {
     let mut world: Vec<Box<dyn shape::Shape>> = Vec::new();
-    let ground_mat = Arc::new(material::Lambertian::new(color::RGB::new(0.5, 0.5, 0.5)));
+    let odd = Box::new(texture::SolidTexture{color:color::RGB::new(0.2, 0.3, 0.1)});
+    let even = Box::new(texture::SolidTexture{color:color::RGB::new(0.9, 0.9, 0.9)});
+    let ground_mat = Arc::new(material::Lambertian{albedo:Box::new(texture::CheckerTexture{odd, even})});
     world.push(Box::new(shape::Sphere{center:Vec3d::new(0.,-1000.,0.), radius:1000., mat:ground_mat.clone()}));
     for a in -5..6 {
         for b in -5..6 {

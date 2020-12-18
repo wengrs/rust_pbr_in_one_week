@@ -5,7 +5,7 @@ use crate::material;
 use crate::aabb::AABB;
 use std::sync::Arc;
 
-pub trait Shape {
+pub trait Shape{
     fn hit(&self, r: &Ray, tmin: f64, tmax: f64) -> Hit;
     fn bound(&self, t0: f64, t1: f64) -> AABB;
 }
